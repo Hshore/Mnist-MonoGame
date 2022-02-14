@@ -61,7 +61,7 @@ namespace Minst_MonoGame
         protected override void LoadContent()
         {
             testData = new TestData("alpha");
-            net = new NeuralNet(new int[] { 28*28, 300, 200, 100, 200, 300, 28 *28 });
+            net = new NeuralNet(new int[] { 28*28, 400, 300, 200, 300, 400, 28 *28 });
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             font = Content.Load<SpriteFont>("defaultFont");
             // TODO: use this.Content to load your game content here
