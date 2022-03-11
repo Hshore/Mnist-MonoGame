@@ -14,8 +14,8 @@ namespace Minst_MonoGame
 
         public float[] outputs;
         public float[] inputs;
-        public float[,] weights;
-        public float[,] weightsDelta;
+        public float[][] weights;
+        public float[][] weightsDelta;
         public float[] gamma;
         public float[] error;
         public float learningRate;
@@ -27,8 +27,18 @@ namespace Minst_MonoGame
             learningRate = _learningRate;
             outputs = new float[numberOfOutputs];
             inputs = new float[numberOfInputs];
-            weights = new float[numberOfOutputs, numberOfInputs];
-            weightsDelta = new float[numberOfOutputs, numberOfInputs];
+            //weights = new float[numberOfOutputs, numberOfInputs];
+            weights = new float[numberOfOutputs][];
+            for (int i = 0; i < weights.Length; i++)
+            {
+                weights[i] = new float[numberOfInputs];
+            }
+            // weightsDelta = new float[numberOfOutputs, numberOfInputs];
+            weightsDelta = new float[numberOfOutputs][];
+            for (int i = 0; i < weightsDelta.Length; i++)
+            {
+                weightsDelta[i] = new float[numberOfInputs];
+            }
             gamma = new float[numberOfOutputs];
             error = new float[numberOfOutputs];
 
@@ -41,7 +51,7 @@ namespace Minst_MonoGame
             {
                 for (int j = 0; j < numberOfInputs; j++)
                 {
-                    weights[i, j] -= weightsDelta[i, j] * learningRate;
+                    weights[i][j] -= weightsDelta[i][j] * learningRate;
                 }
             }
         }
@@ -72,17 +82,18 @@ namespace Minst_MonoGame
             for (int i = 0; i < numberOfOutputs; i++)
             {
                 error[i] = outputs[i] - expected[i];
+                //error[i] = error[i] * error[i];
                 gamma[i] = error[i] * SigDer(outputs[i]);
                 for (int j = 0; j < numberOfInputs; j++)
                 {
-                    weightsDelta[i, j] = gamma[i] * inputs[j];
+                    weightsDelta[i][j] = gamma[i] * inputs[j];
                 }
             }
 
            
         }
 
-        public void BackPropHidden(float[] gammaForward, float[,] weightsforward)
+        public void BackPropHidden(float[] gammaForward, float[][] weightsforward)
         {
             for (int i = 0; i < numberOfOutputs; i++)
             {
@@ -90,7 +101,7 @@ namespace Minst_MonoGame
 
                 for (int j = 0; j < gammaForward.Length; j++)
                 {
-                    gamma[i] += gammaForward[j] * weightsforward[j, i];
+                    gamma[i] += gammaForward[j] * weightsforward[j][i];
                 }
 
                 gamma[i] *= SigDer(outputs[i]);
@@ -102,7 +113,7 @@ namespace Minst_MonoGame
                 for (int j = 0; j < numberOfInputs; j++)
                 //Parallel.ForEach(inputs, (input, state, index) =>
                 {
-                     weightsDelta[i, j] = gamma[i] * inputs[j];
+                     weightsDelta[i][j] = gamma[i] * inputs[j];
                 }//);
             }
         }
@@ -113,7 +124,7 @@ namespace Minst_MonoGame
             {
                 for (int j = 0; j < numberOfInputs; j++)
                 {
-                    weights[i, j] = (float)ThreadSafeRandom.NextDouble(-0.5, 0.5);
+                    weights[i][j] = (float)ThreadSafeRandom.NextDouble(-0.5, 0.5);
                 }
             }
         }
@@ -126,7 +137,7 @@ namespace Minst_MonoGame
                 outputs[i] = 0;
                 for (int j = 0; j < numberOfInputs; j++) 
                 {
-                    outputs[i] += inputs[j] * weights[i, j];               
+                    outputs[i] += inputs[j] * weights[i][ j];               
                 }             
                 outputs[i] = Sig(outputs[i]);
             }

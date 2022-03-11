@@ -25,6 +25,7 @@ namespace Minst_MonoGame
         public const float TIMER = 0.5f;
         public bool runNet = false;
         public string lastLabel = "";
+        public string TimeLabel = "";
 
         Texture2D button_texture;
         Texture2D slider_texture;
@@ -61,7 +62,7 @@ namespace Minst_MonoGame
         protected override void LoadContent()
         {
             testData = new TestData("alpha");
-            net = new NeuralNet(new int[] { 28*28, 400, 300, 200, 300, 400, 28 *28 });
+            net = new NeuralNet(new int[] { 28*28, 400, 50, 400, 28 *28 });
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             font = Content.Load<SpriteFont>("defaultFont");
             // TODO: use this.Content to load your game content here
@@ -131,10 +132,13 @@ namespace Minst_MonoGame
             }
             if (runNet)
             {
-                for (int i = 0; i < 1; i++)
+                for (int i = 0; i < 2; i++)
                 {
+                    var watch = new Stopwatch();
+                    watch.Start();
                         net.Train(1, out currentMnistImage, out currentOutputs);
-
+                    TimeLabel = watch.Elapsed.TotalSeconds.ToString();
+                    watch.Stop();
                 }
                 
                // netData = net.GetNetworkStatus();
@@ -202,6 +206,7 @@ namespace Minst_MonoGame
             _spriteBatch.DrawString(font, netData[2], new Vector2(window_w / 2 - s2.X, window_h / 2 + 150), Color.Black);
             _spriteBatch.DrawString(font, netData[5], new Vector2(window_w / 2 - s5.X, window_h / 2 + 200), Color.Black);
             _spriteBatch.DrawString(font, "Label: " + lastLabel, new Vector2(window_w/2 - s5.X, window_h/2 +250), Color.Black);
+            _spriteBatch.DrawString(font, "time: " + TimeLabel, new Vector2(window_w/2 - s5.X, window_h/2 +300), Color.Black);
             _spriteBatch.Draw(mnistImage, new Rectangle(window_w/2 -200 -300, 0, 400, 400), Color.White);
             _spriteBatch.Draw(mnistImageOut, new Rectangle(window_w/2 -200 +300, 0, 400, 400), Color.White);
             // TODO: Add your drawing code here

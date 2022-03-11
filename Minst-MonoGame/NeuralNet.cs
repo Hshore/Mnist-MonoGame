@@ -16,7 +16,7 @@ namespace Minst_MonoGame
         public long currentGen;
         public List<Extensions.Image> mnistTrainingImages;
         public bool isAutoEncoder = true;
-        public float learningRate = 0.03147f;
+        public float learningRate = 0.01f;
 
         public NeuralNet(int[] layer, TestData _testData = null)
         {

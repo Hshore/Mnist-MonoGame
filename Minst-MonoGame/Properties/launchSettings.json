@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Minst-MonoGame": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
