@@ -33,5 +33,16 @@ namespace Minst_MonoGame
             public float[] DataFlat_NetInputs { get; set; }
         }
 
+        public enum Location
+        {
+            TopLeft,
+            TopRight,
+            TopMiddle,
+            BottomMiddle,
+            BottomLeft,
+            BottomRight,
+            Middle
+        }
+
     }
 }

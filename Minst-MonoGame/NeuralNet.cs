@@ -65,7 +65,16 @@ namespace Minst_MonoGame
 
             for (int i = 0; i < layers.Length; i++)
             {
-                layers[i] = new Layer(layer[i], layer[i + 1], learningRate);
+                if (i < layers.Length -1)
+                {
+                    layers[i] = new Layer(layer[i], layer[i + 1], learningRate, false);
+
+                }
+                else
+                {
+
+                    layers[i] = new Layer(layer[i], layer[i + 1], learningRate, false);
+                }
             }
 
         }

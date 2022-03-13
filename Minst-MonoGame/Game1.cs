@@ -13,8 +13,8 @@ namespace Minst_MonoGame
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private SpriteFont font;
-        public static int window_w = 2560;
-        public static int window_h = 1440;
+        public static int window_w = 1700;
+        public static int window_h = 900;
         public NeuralNet net;
         public TestData testData;
         public Extensions.Image currentMnistImage;
@@ -37,6 +37,7 @@ namespace Minst_MonoGame
         Texture2D mnistImageOut;
 
         private List<Button> _buttonComponents;
+        private List<NetworkVisualisation> _netComponents;
 
         Stopwatch watch = new Stopwatch();
         public Game1()
@@ -62,12 +63,12 @@ namespace Minst_MonoGame
         protected override void LoadContent()
         {
             testData = new TestData("alpha");
-            net = new NeuralNet(new int[] { 28*28, 400, 50, 400, 28 *28 });
+            net = new NeuralNet(new int[] { 28*28, 400, 10, 400, 28*28 });
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             font = Content.Load<SpriteFont>("defaultFont");
             // TODO: use this.Content to load your game content here
             
-            whiteRectangle = new Texture2D(GraphicsDevice, 300, 100);
+            whiteRectangle = new Texture2D(GraphicsDevice, 100, 100);
             int[] arry = new int[whiteRectangle.Width*whiteRectangle.Height];
             for (int i = 0; i < whiteRectangle.Width * whiteRectangle.Height; i++)
             {
@@ -86,7 +87,8 @@ namespace Minst_MonoGame
             var Start_Stop = new Button(whiteRectangle, font);
             Start_Stop.w_offset = 100;
             Start_Stop.h_offset = -100;
-            Start_Stop.location = Button.Location.BottomLeft;
+            Start_Stop.location = Extensions.Location.BottomLeft;
+            Start_Stop.ButtonSize = new Vector2(200, 100);
             Start_Stop.Text = "Run";
             Start_Stop.Click += Start_Stop_Click;
 
@@ -96,6 +98,14 @@ namespace Minst_MonoGame
                // singlebutton,              
             };
 
+            var netVisual = new NetworkVisualisation(whiteRectangle, whiteRectangle, net);
+            netVisual.pos = new Vector2(450,20);
+
+            _netComponents = new List<NetworkVisualisation>
+            {
+                netVisual
+               // singlebutton,              
+            };
         }
 
         private void Start_Stop_Click(object sender, Button button)
@@ -182,16 +192,19 @@ namespace Minst_MonoGame
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(new Color(20,20,20,255));
             _spriteBatch.Begin();
 
             foreach (var button in _buttonComponents)
             {
                 button.Draw(gameTime, _spriteBatch);
             }
+            foreach (var netC in _netComponents)
+            {
+                netC.Draw(gameTime, _spriteBatch);
+            }
 
-
-            var s6 = font.MeasureString(netData[6]) / 2;
+            /*var s6 = font.MeasureString(netData[6]) / 2;
        //     var s7 = font.MeasureString(netData[7]) / 2;
             var s1 = font.MeasureString(netData[1]) / 2;
             var s2 = font.MeasureString(netData[2]) / 2;
@@ -206,9 +219,9 @@ namespace Minst_MonoGame
             _spriteBatch.DrawString(font, netData[2], new Vector2(window_w / 2 - s2.X, window_h / 2 + 150), Color.Black);
             _spriteBatch.DrawString(font, netData[5], new Vector2(window_w / 2 - s5.X, window_h / 2 + 200), Color.Black);
             _spriteBatch.DrawString(font, "Label: " + lastLabel, new Vector2(window_w/2 - s5.X, window_h/2 +250), Color.Black);
-            _spriteBatch.DrawString(font, "time: " + TimeLabel, new Vector2(window_w/2 - s5.X, window_h/2 +300), Color.Black);
-            _spriteBatch.Draw(mnistImage, new Rectangle(window_w/2 -200 -300, 0, 400, 400), Color.White);
-            _spriteBatch.Draw(mnistImageOut, new Rectangle(window_w/2 -200 +300, 0, 400, 400), Color.White);
+            _spriteBatch.DrawString(font, "time: " + TimeLabel, new Vector2(window_w/2 - s5.X, window_h/2 +300), Color.Black);*/
+            _spriteBatch.Draw(mnistImage, new Rectangle(20, 20, 400, 400), Color.White);
+            _spriteBatch.Draw(mnistImageOut, new Rectangle(1280, 20, 400, 400), Color.White);
             // TODO: Add your drawing code here
             _spriteBatch.End();
             base.Draw(gameTime);

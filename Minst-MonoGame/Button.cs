@@ -11,37 +11,46 @@ namespace Minst_MonoGame
 {
     public class Button : Component     
     {
-        public enum Location 
-        {
-            TopLeft,
-            TopRight,
-            TopMiddle,
-            BottomMiddle,
-            BottomLeft,
-            BottomRight,
-        }
-
-        public Location location { get; set; }
+      
+        public Extensions.Location location { get; set; }
 
         public int w_offset { get; set; }
         public int h_offset { get; set; }
 
         public int CurrentWindowWidth { get; set; }
         public int CurrentWindowHeight { get; set; }
+        public Vector2 ButtonSize { get; set; }
 
         public float Scale = 1f;
         public float ScaledTextureWidth
         {
             get
             {
-                return _texture.Width * Scale;
+                if (ButtonSize.X != 0)
+                {
+                    return ButtonSize.X;
+                }
+                else
+                {
+                    return _texture.Width * Scale;
+
+                }
             }
         }
         public float ScaledTextureHeight
         {
             get
             {
-                return _texture.Height * Scale;
+                if (ButtonSize.Y != 0)
+                {
+                    return ButtonSize.Y;
+
+                }
+                else
+                {
+                    return _texture.Height * Scale;
+
+                }
             }
         }
 
@@ -61,44 +70,17 @@ namespace Minst_MonoGame
         public Color PenColour { get; set; }
         public Vector2 Position { get; set; }
         public Vector2 PositionScale { get; set; }
-        public Rectangle Rectangle
+        public Rectangle Rectangle => location switch
         {
-
-
-            get
-            {
-
-                switch (location)
-                {
-                    case Location.TopLeft:
-                        return new Rectangle(0 + w_offset, 0 + h_offset, (int)ScaledTextureWidth, (int)ScaledTextureHeight);
-                        break;
-                    case Location.TopRight:
-                        return new Rectangle(CurrentWindowWidth - (int)ScaledTextureWidth + w_offset, 0 + h_offset, (int)ScaledTextureWidth, (int)ScaledTextureHeight);
-                        break;
-                    case Location.TopMiddle:
-                        return new Rectangle((CurrentWindowWidth / 2) - ((int)ScaledTextureWidth / 2) + w_offset, 0 + h_offset, (int)ScaledTextureWidth, (int)ScaledTextureHeight);
-                        break;
-                    case Location.BottomLeft:
-
-                        return new Rectangle(0 + w_offset, CurrentWindowHeight - (int)ScaledTextureHeight + h_offset, (int)ScaledTextureWidth, (int)ScaledTextureHeight);
-
-                        break;
-                    case Location.BottomRight:
-                        return new Rectangle(CurrentWindowWidth - (int)ScaledTextureWidth + w_offset, CurrentWindowHeight - (int)ScaledTextureHeight + h_offset, (int)ScaledTextureWidth, (int)ScaledTextureHeight);
-                        break;
-                    case Location.BottomMiddle:
-                        return new Rectangle((CurrentWindowWidth / 2) - ((int)ScaledTextureWidth / 2) + w_offset, CurrentWindowHeight - (int)ScaledTextureHeight + h_offset, (int)ScaledTextureWidth, (int)ScaledTextureHeight);
-                        break;
-                   
-                    default:
-                        return new Rectangle((CurrentWindowWidth / 2) - ((int)ScaledTextureWidth / 2) + w_offset, CurrentWindowHeight - (int)ScaledTextureHeight + h_offset, (int)ScaledTextureWidth, (int)ScaledTextureHeight);
-                        break;
-                }
-
-
-            }
-        }
+            Extensions.Location.TopLeft => new Rectangle(0 + w_offset, 0 + h_offset, (int)ScaledTextureWidth, (int)ScaledTextureHeight),
+            Extensions.Location.TopRight => new Rectangle(CurrentWindowWidth - (int)ScaledTextureWidth + w_offset, 0 + h_offset, (int)ScaledTextureWidth, (int)ScaledTextureHeight),
+            Extensions.Location.TopMiddle => new Rectangle((CurrentWindowWidth / 2) - ((int)ScaledTextureWidth / 2) + w_offset, 0 + h_offset, (int)ScaledTextureWidth, (int)ScaledTextureHeight),
+            Extensions.Location.BottomLeft => new Rectangle(0 + w_offset, CurrentWindowHeight - (int)ScaledTextureHeight + h_offset, (int)ScaledTextureWidth, (int)ScaledTextureHeight),
+            Extensions.Location.BottomRight => new Rectangle(CurrentWindowWidth - (int)ScaledTextureWidth + w_offset, CurrentWindowHeight - (int)ScaledTextureHeight + h_offset, (int)ScaledTextureWidth, (int)ScaledTextureHeight),
+            Extensions.Location.BottomMiddle => new Rectangle((CurrentWindowWidth / 2) - ((int)ScaledTextureWidth / 2) + w_offset, CurrentWindowHeight - (int)ScaledTextureHeight + h_offset, (int)ScaledTextureWidth, (int)ScaledTextureHeight),
+            Extensions.Location.Middle => new Rectangle((CurrentWindowWidth / 2) - ((int)ScaledTextureWidth / 2) + w_offset, (CurrentWindowHeight / 2) - ((int)ScaledTextureHeight / 2) + h_offset, (int)ScaledTextureWidth, (int)ScaledTextureHeight),
+            _ => new Rectangle((CurrentWindowWidth / 2) - ((int)ScaledTextureWidth / 2) + w_offset, CurrentWindowHeight - (int)ScaledTextureHeight + h_offset, (int)ScaledTextureWidth, (int)ScaledTextureHeight),
+        };
         public string Text { get; set; }
         #endregion
 
@@ -122,6 +104,7 @@ namespace Minst_MonoGame
             }
 
             sprite.Draw(_texture, Rectangle, color);
+           // sprite.Draw(_texture, new Rectangle(Rectangle.X,Rectangle.Y, 300, Rectangle.Height), null , color);
 
             if (!string.IsNullOrEmpty(Text))
             {
