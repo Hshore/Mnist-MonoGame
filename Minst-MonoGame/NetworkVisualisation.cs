@@ -23,6 +23,8 @@ namespace Minst_MonoGame
         public Vector2 pos;
         public Vector2 CurrentNodePos;
         public Vector2 CurrentLayerPos;
+        public List<Rectangle> rects;
+        public List<Color> colours;
 
 
         public NetworkVisualisation(Texture2D _nodeTexture, Texture2D _weightTexture, NeuralNet _netRef)
@@ -30,15 +32,18 @@ namespace Minst_MonoGame
             nodeTexture = _nodeTexture;
             weightTexture = _weightTexture;
             netRef = _netRef;
+            rects = new List<Rectangle>();
+            colours = new List<Color>();
           //  CurrentLayerPos = new Vector2(pos.X, pos.Y);
           //  CurrentNodePos = new Vector2(CurrentLayerPos.X, CurrentLayerPos.Y);
         }
 
-        public override void Draw(GameTime gameTime, SpriteBatch sprite)
+        public void updateVisualisation()
         {
-            sprite.Draw(nodeTexture, backgroundRect, Color.Black);
-
-            var layersWidthSpacing = (backgroundRect.Width) / netRef.layers.Length+1;
+            rects.Clear();
+            colours.Clear();
+            // throw new NotImplementedException();
+            var layersWidthSpacing = (backgroundRect.Width) / netRef.layers.Length + 1;
             var nodePos = pos;
             var padding = 1;
             var layerCount = 0;
@@ -50,8 +55,9 @@ namespace Minst_MonoGame
                     foreach (var node in layer.inputs)
                     {
                         int nValue = (int)(node * 255);
-                        Color c = new Color(nValue, nValue, nValue, 255);
-                        sprite.Draw(nodeTexture, new Rectangle((int)nodePos.X,(int)nodePos.Y,(int)layersWidthSpacing, (int)nodeHeightSpacing), null, c, 0, new Vector2(0, 0), SpriteEffects.None, 1);
+                        colours.Add( new Color(nValue, nValue, nValue, 255));
+                        rects.Add(new Rectangle((int)nodePos.X, (int)nodePos.Y, (int)layersWidthSpacing, (int)nodeHeightSpacing));
+                        //sprite.Draw(nodeTexture, new Rectangle((int)nodePos.X,(int)nodePos.Y,(int)layersWidthSpacing, (int)nodeHeightSpacing), null, c, 0, new Vector2(0, 0), SpriteEffects.None, 1);
                         nodePos.Y += nodeHeightSpacing;
                     }
                     nodePos.Y = pos.Y;
@@ -61,8 +67,9 @@ namespace Minst_MonoGame
                     foreach (var node in layer.outputs)
                     {
                         int nValue = (int)(node * 255);
-                        Color c = new Color(nValue, nValue, nValue, 255);
-                        sprite.Draw(nodeTexture, new Rectangle((int)nodePos.X, (int)nodePos.Y, (int)layersWidthSpacing, (int)nodeHeightSpacing), null, c, 0, new Vector2(0, 0), SpriteEffects.None, 1);
+                        colours.Add( new Color(nValue, nValue, nValue, 255));
+                        rects.Add(new Rectangle((int)nodePos.X, (int)nodePos.Y, (int)layersWidthSpacing, (int)nodeHeightSpacing));
+                        //sprite.Draw(nodeTexture, new Rectangle((int)nodePos.X, (int)nodePos.Y, (int)layersWidthSpacing, (int)nodeHeightSpacing), null, c, 0, new Vector2(0, 0), SpriteEffects.None, 1);
                         nodePos.Y += nodeHeightSpacing;
                     }
                     nodePos.Y = pos.Y;
@@ -74,8 +81,9 @@ namespace Minst_MonoGame
                     foreach (var node in layer.outputs)
                     {
                         int nValue = (int)(node * 255);
-                        Color c = new Color(nValue, nValue, nValue, 255);
-                        sprite.Draw(nodeTexture, new Rectangle((int)nodePos.X, (int)nodePos.Y, (int)layersWidthSpacing, (int)nodeHeightSpacing), null, c, 0, new Vector2(0, 0), SpriteEffects.None, 1);
+                        colours.Add( new Color(nValue, nValue, nValue, 255));
+                        rects.Add(new Rectangle((int)nodePos.X, (int)nodePos.Y, (int)layersWidthSpacing, (int)nodeHeightSpacing));
+                        //sprite.Draw(nodeTexture, new Rectangle((int)nodePos.X, (int)nodePos.Y, (int)layersWidthSpacing, (int)nodeHeightSpacing), null, c, 0, new Vector2(0, 0), SpriteEffects.None, 1);
                         nodePos.Y += nodeHeightSpacing;
                     }
                     nodePos.Y = pos.Y;
@@ -83,15 +91,28 @@ namespace Minst_MonoGame
                 }
 
 
-               
+
                 layerCount++;
             }
-          //  throw new NotImplementedException();
+        }
+
+        public override void Draw(GameTime gameTime, SpriteBatch sprite)
+        {
+            sprite.Draw(nodeTexture, backgroundRect, Color.Black);
+            var i = 0;
+            foreach (var r in rects)
+            {
+                sprite.Draw(nodeTexture, r, null, colours[i], 0, new Vector2(0, 0), SpriteEffects.None, 1);
+                i++;
+            }
+
+
+            //  throw new NotImplementedException();
         }
 
         public override void Update(GameTime gameTime, GameWindow window)
         {
-          // throw new NotImplementedException();
+            
         }
     }
 }

@@ -55,7 +55,7 @@ namespace Minst_MonoGame
                 {
                     for (int j = 0; j < numberOfInputs; j++)
                     {
-                        weights[indexI][j] -= (weightsDelta[indexI][j]) * learningRate;
+                        weights[indexI][j] -= (weightsDelta[indexI][j])* learningRate ;
                     }
                 });
         }
@@ -91,7 +91,7 @@ namespace Minst_MonoGame
                 {
                     err2 *= -1;
                 }
-               // error[i] = err2;
+              //  error[i] = err2;
                 gamma[i] = error[i] * SigDer(outputs[i]);
                 for (int j = 0; j < numberOfInputs; j++)
                 {

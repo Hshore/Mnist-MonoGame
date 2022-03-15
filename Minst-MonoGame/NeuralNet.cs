@@ -29,6 +29,7 @@ namespace Minst_MonoGame
                 mnistTrainingImages.Add(image);
 
             }
+            
             //Flatten
             foreach (var item in mnistTrainingImages)
             {
@@ -171,7 +172,7 @@ namespace Minst_MonoGame
 
             }
 
-            data[2] = "Error: ";
+            data[2] = "Err:";
             float counter = 0;
             foreach (var err in layers[^1].error)
             {
@@ -188,7 +189,29 @@ namespace Minst_MonoGame
                     data[3] += j;
                 }
             }
-            data[4] = "Output Length: " + layers[^1].outputs.Length;
+            data[4] = "HiWeight: ";
+            float largestWeight = 0;
+            float lowestWeight = 0;
+            foreach (var layer in layers)
+            {
+                for (int i = 0; i < layer.weights.Length; i++)
+                {
+                    for (int j = 0; j < layer.weights[i].Length; j++)
+                    {
+                        if (layer.weights[i][j] > largestWeight)
+                        {
+                            largestWeight = layer.weights[i][j];
+                        }
+                        if (layer.weights[i][j] < lowestWeight)
+                        {
+                            lowestWeight = layer.weights[i][j];
+                        }
+
+                    }
+                }
+            }
+            data[4] = data[4] + largestWeight.ToString("0.000");
+            data[6] = "LoWeight: " + lowestWeight.ToString("0.000");
             data[5] = "Gen: " + currentGen;
 
 
