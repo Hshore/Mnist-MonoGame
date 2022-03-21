@@ -123,7 +123,8 @@ namespace Minst_MonoGame
         protected override void LoadContent()
         {
             testData = new TestData("alpha");
-            net = new NeuralNet(new int[] { 28 * 28, 600, 300, 30, 300, 600, 28 * 28 });
+            //var img = net.GetRandomTrainingImage();
+            net = new NeuralNet(new int[] { 100,300, 30, 300, 100 });
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             font = Content.Load<SpriteFont>("defaultFont");
 
@@ -138,8 +139,10 @@ namespace Minst_MonoGame
             }
             whiteRectangle.SetData<int>(arry);
 
-            mnistImage = new Texture2D(GraphicsDevice, 28, 28);
-            mnistImageOut = new Texture2D(GraphicsDevice, 28, 28);
+            var w = net.selectedData[0].Data.GetLength(0);
+            var h = net.selectedData[0].Data.GetLength(1);
+            mnistImage = new Texture2D(GraphicsDevice, w, h);
+            mnistImageOut = new Texture2D(GraphicsDevice, w, h);
             currentMnistImage = net.GetRandomTrainingImage();
             currentMnistOutImage = net.GetRandomTrainingImage();
             mnistImage.SetData<byte>(currentMnistImage.DataFlat);
@@ -240,7 +243,8 @@ namespace Minst_MonoGame
                     _netComponents[0].updateVisualisation();
                     netData = net.GetNetworkStatus();
                     mnistImage.SetData<byte>(currentMnistImage.DataFlat);
-                    byte[] arry = new byte[3136];
+                    
+                    byte[] arry = new byte[mnistImageOut.Width*mnistImageOut.Height*4];
                     if (currentOutputs != null)
                     {
                         // mnistImageOut.SetData<byte>(arry);

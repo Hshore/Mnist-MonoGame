@@ -20,15 +20,3 @@
 /processorParam:TextureFormat=Compressed
 /build:defaultFont.spritefont
 
-#begin t10k-images.idx3-ubyte
-/copy:t10k-images.idx3-ubyte
-
-#begin t10k-labels.idx1-ubyte
-/copy:t10k-labels.idx1-ubyte
-
-#begin train-images.idx3-ubyte
-/copy:train-images.idx3-ubyte
-
-#begin train-labels.idx1-ubyte
-/copy:train-labels.idx1-ubyte
-
