@@ -30,6 +30,8 @@ namespace Minst_MonoGame
         public string lastLabel = "";
         public string TimeLabel = "";
         public string debugLabel = "";
+        private OpenCL opencl;
+        public int currentgen;
 
         Texture2D button_texture;
         Texture2D slider_texture;
@@ -87,12 +89,21 @@ namespace Minst_MonoGame
                     // Perform a time consuming operation and report progress.
                     var watch = new Stopwatch();
                     watch.Start();
-                    net.Train(1, out currentMnistImage, out currentOutputs);
-                    TimeLabel = watch.Elapsed.TotalSeconds.ToString("0.000") + "s/img";
+                    //getNextImage
+                    currentMnistImage = net.GetRandomTrainingImage();
+                    
+
+                    opencl.feedforwardNetwork(currentMnistImage.DataFlat_NetInputs);
+                    opencl.backpropNetwork(currentMnistImage.LabelArray);
+                    opencl.updateWeights();
+
+                   // currentOutputs = output;
+                    //net.Train(1, out currentMnistImage, out currentOutputs);
+                    //TimeLabel = watch.Elapsed.TotalSeconds.ToString("0.000") + "s/img";
                     watch.Stop();
 
                     NetWorker.ReportProgress(i);
-
+                    currentgen++;
                 }
             }
 
@@ -124,10 +135,17 @@ namespace Minst_MonoGame
         {
             testData = new TestData("alpha");
             //var img = net.GetRandomTrainingImage();
-            net = new NeuralNet(new int[] { 100,300, 30, 300, 100 });
+            net = new NeuralNet(new int[] { 100,300, 50, 300, 100 });
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             font = Content.Load<SpriteFont>("defaultFont");
-
+            var tempimg = net.GetRandomTrainingImage();
+            // var tempins = net.GetRandomTrainingImage().LabelArray;
+            var inputLength = tempimg.DataFlat_NetInputs.Length;
+            var outputLength = tempimg.LabelArray.Length;
+          //  currentOutputs = new float[tempins.Length];
+            currentOutputs = new float[outputLength];
+           // opencl = new OpenCL(new int[] { inputLength, 600,500,400,300,20,300,400,500,600,  tempins.Length });
+            opencl = new OpenCL(new int[] { inputLength, 600,500,400, outputLength });
             // TODO: use this.Content to load your game content here
 
             whiteRectangle = new Texture2D(GraphicsDevice, 100, 100);
@@ -243,12 +261,14 @@ namespace Minst_MonoGame
                     _netComponents[0].updateVisualisation();
                     netData = net.GetNetworkStatus();
                     mnistImage.SetData<byte>(currentMnistImage.DataFlat);
-                    
+                    opencl.Args_CL["outNodes"].ReadFromDeviceTo(currentOutputs);
                     byte[] arry = new byte[mnistImageOut.Width*mnistImageOut.Height*4];
+                    string outputString = "";
                     if (currentOutputs != null)
                     {
                         // mnistImageOut.SetData<byte>(arry);
                         var c = 0;
+                        var d = 0;
                         foreach (var item in currentOutputs)
                         {
                             arry[c] = (byte)(item * 255);
@@ -256,13 +276,17 @@ namespace Minst_MonoGame
                             arry[c + 2] = (byte)(item * 255);
                             arry[c + 3] = 255;
                             c += 4;
+
+
+                            outputString += $"{d}:{String.Format("{0:0.00}", item*100)}%\n";
+                            d++;
                         }
                         //arry = currentOutputs.Select(f => Convert.ToByte(f)).ToArray();
                         //
                         //currentOutputs.CopyTo(arry, 0);
                         mnistImageOut.SetData<byte>(arry);
-                        lastLabel = currentMnistImage.Label.ToString();
-
+                        //lastLabel = currentMnistImage.Label.ToString();
+                        lastLabel = outputString;
                         //   NetWorker.RunWorkerAsync();
 
                     }
@@ -303,14 +327,15 @@ namespace Minst_MonoGame
             //    _spriteBatch.DrawString(font, netData[7], new Vector2(window_w / 2 - s7.X, window_h / 2 -100), Color.Black);
             //    _spriteBatch.DrawString(font, netData[6], new Vector2(window_w / 2 + 300, window_h / 2 +50), Color.Black);
             //   _spriteBatch.DrawString(font, netData[1], new Vector2(window_w/2 - s1.X, window_h/2 ), Color.Black);
-            _spriteBatch.DrawString(font, "" + TimeLabel, new Vector2(window_w / 2 + 430, window_h / 2), Color.White);
-            _spriteBatch.DrawString(font, netData[2], new Vector2(window_w / 2 + 430, window_h / 2 + 50), Color.White);
-            _spriteBatch.DrawString(font, netData[5], new Vector2(window_w / 2 + 430, window_h / 2 + 100), Color.White);
+            _spriteBatch.DrawString(font, lastLabel, new Vector2(window_w / 2 + 430, 50), Color.White);
+           // _spriteBatch.DrawString(font, "" + TimeLabel, new Vector2(window_w / 2 + 430, window_h / 2), Color.White);
+         //   _spriteBatch.DrawString(font, netData[2], new Vector2(window_w / 2 + 430, window_h / 2 + 50), Color.White);
+            _spriteBatch.DrawString(font, "Gen: "+ currentgen, new Vector2(window_w / 2 + 430, window_h / 2 + 200), Color.White);
             // _spriteBatch.DrawString(font, netData[4], new Vector2(window_w / 2 + 430, window_h / 2 + 100), Color.White);
             // _spriteBatch.DrawString(font, netData[6], new Vector2(window_w / 2 + 430, window_h / 2 + 200), Color.White);
             //    _spriteBatch.DrawString(font, netData[3], new Vector2(window_w / 2 - s3.X, window_h / 2 + 100), Color.Black);
             _spriteBatch.Draw(mnistImage, new Rectangle(20, 20, 400, 400), Color.White);
-            _spriteBatch.Draw(mnistImageOut, new Rectangle(1280, 20, 400, 400), Color.White);
+        //    _spriteBatch.Draw(mnistImageOut, new Rectangle(1280, 20, 400, 400), Color.White);
             // TODO: Add your drawing code here
             _spriteBatch.End();
             base.Draw(gameTime);

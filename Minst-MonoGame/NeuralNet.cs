@@ -19,9 +19,10 @@ namespace Minst_MonoGame
         public List<Extensions.Image> mnistTrainingImages;
         public List<Extensions.Image> marioTrainingImages;
         public List<Extensions.Image> selectedData;
-        public string selectedDataString = "mario";
+        public string selectedDataString = "mariho";
         public bool isAutoEncoder = true;
         public float learningRate = 0.01f;
+        public static OpenCL openCL;
         
 
         public NeuralNet(int[] layer, TestData _testData = null)
@@ -30,7 +31,7 @@ namespace Minst_MonoGame
             // testData = _testData;
             mnistTrainingImages = new List<Extensions.Image>();
             marioTrainingImages = new List<Extensions.Image>();
-            
+       //     openCL = new OpenCL(new int[] { 2,2,2});
             var ImagePath = @"Content/imgs";
             foreach (var image in MnistReader.ReadTrainingData())
             {
@@ -135,16 +136,9 @@ namespace Minst_MonoGame
 
             for (int i = 0; i < layers.Length; i++)
             {
-                if (i < layers.Length - 1)
-                {
-                    layers[i] = new Layer(this.layer[i], this.layer[i + 1], learningRate, false);
-
-                }
-                else
-                {
-
-                    layers[i] = new Layer(this.layer[i], this.layer[i + 1], learningRate, false);
-                }
+                layers[i] = i < layers.Length - 1
+                    ? new Layer(this.layer[i], this.layer[i + 1], learningRate, false, openCL)
+                    : new Layer(this.layer[i], this.layer[i + 1], learningRate, false, openCL);
             }
 
         }
@@ -201,7 +195,8 @@ namespace Minst_MonoGame
                 }
                 else
                 {
-                    layers[i].BackPropHidden(layers[i + 1].gamma, layers[i + 1].weights);
+                    layers[i].BackPropHidden(layers[i + 1].gamma, layers[i + 1].weights, layers[i + 1].weights_flat, layers[i + 1].numberOfInputs);
+
                 }
 
                 layers[i].UpdateWeights();

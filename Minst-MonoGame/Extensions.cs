@@ -28,6 +28,19 @@ namespace Minst_MonoGame
         public class Image
         {
             public byte Label { get; set; }
+            public float[] LabelArray 
+            {
+
+                get 
+                {
+                    var arr = new float[10];
+                    arr[(int)Label] = 1;
+                    return arr;
+                }
+                
+                
+            
+            }
             public byte[,] Data { get; set; }
             public byte[] DataFlat { get; set; }
             public float[] DataFlat_NetInputs { get; set; }
