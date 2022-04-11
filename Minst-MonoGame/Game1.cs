@@ -15,6 +15,7 @@ namespace Minst_MonoGame
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private SpriteFont font;
+        private SpriteFont largefont;
         public static int window_w = 1700;
         public static int window_h = 900;
         public NeuralNet net;
@@ -27,11 +28,16 @@ namespace Minst_MonoGame
         public const float TIMER = 0.5f;
         public bool Tick = false;
         public bool runNet = false;
-        public string lastLabel = "";
+        public string lastoutputstring = "";
+        public int lasttargetlabel;
+        public int[] lastLabels;
+        public string averageConfidance = "";
         public string TimeLabel = "";
         public string debugLabel = "";
         private OpenCL opencl;
         public int currentgen;
+        public float runningConfidance = 0;
+        public int runningConfidanceCount = 0;
 
         Texture2D button_texture;
         Texture2D slider_texture;
@@ -93,11 +99,27 @@ namespace Minst_MonoGame
                     currentMnistImage = net.GetRandomTrainingImage();
                     
 
-                    opencl.feedforwardNetwork(currentMnistImage.DataFlat_NetInputs);
+                    var outputs =  opencl.feedforwardNetwork(currentMnistImage.DataFlat_NetInputs);
                     opencl.backpropNetwork(currentMnistImage.LabelArray);
                     opencl.updateWeights();
 
-                   // currentOutputs = output;
+                    float currentConfidence = 0;
+                    float outTotal = 0;
+                    for (int j = 0; j < outputs.Length; j++)
+                    {
+                        outTotal += outputs[j];
+                    }
+                    for (int j = 0; j < currentMnistImage.LabelArray.Length; j++)
+                    {
+                        if (currentMnistImage.LabelArray[j] == 1)
+                        {
+                            currentConfidence = (outputs[j] / outTotal);
+                        }
+                    }
+                    runningConfidance += currentConfidence;
+                    runningConfidanceCount++;
+                   
+               //     currentOutputs = outputs;
                     //net.Train(1, out currentMnistImage, out currentOutputs);
                     //TimeLabel = watch.Elapsed.TotalSeconds.ToString("0.000") + "s/img";
                     watch.Stop();
@@ -138,6 +160,7 @@ namespace Minst_MonoGame
             net = new NeuralNet(new int[] { 100,300, 50, 300, 100 });
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             font = Content.Load<SpriteFont>("defaultFont");
+            largefont = Content.Load<SpriteFont>("largeFont");
             var tempimg = net.GetRandomTrainingImage();
             // var tempins = net.GetRandomTrainingImage().LabelArray;
             var inputLength = tempimg.DataFlat_NetInputs.Length;
@@ -145,7 +168,7 @@ namespace Minst_MonoGame
           //  currentOutputs = new float[tempins.Length];
             currentOutputs = new float[outputLength];
            // opencl = new OpenCL(new int[] { inputLength, 600,500,400,300,20,300,400,500,600,  tempins.Length });
-            opencl = new OpenCL(new int[] { inputLength, 600,500,400, outputLength });
+            opencl = new OpenCL(new int[] { inputLength, 200, 50, outputLength });
             // TODO: use this.Content to load your game content here
 
             whiteRectangle = new Texture2D(GraphicsDevice, 100, 100);
@@ -246,6 +269,8 @@ namespace Minst_MonoGame
             float elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;
             timer -= elapsed;
 
+
+
             if (timer < 0)
             {
                 if (NetWorker.IsBusy)
@@ -264,11 +289,12 @@ namespace Minst_MonoGame
                     opencl.Args_CL["outNodes"].ReadFromDeviceTo(currentOutputs);
                     byte[] arry = new byte[mnistImageOut.Width*mnistImageOut.Height*4];
                     string outputString = "";
+                    float totalouts = 0;
                     if (currentOutputs != null)
                     {
                         // mnistImageOut.SetData<byte>(arry);
                         var c = 0;
-                        var d = 0;
+                     
                         foreach (var item in currentOutputs)
                         {
                             arry[c] = (byte)(item * 255);
@@ -277,19 +303,31 @@ namespace Minst_MonoGame
                             arry[c + 3] = 255;
                             c += 4;
 
-
-                            outputString += $"{d}:{String.Format("{0:0.00}", item*100)}%\n";
+                            totalouts += item;
+                           // outputString += $"{d}:{String.Format("{0:0.00}", item*100)}%\n";
+                           
+                        }
+                        var d = 0;
+                        lastLabels = new int[10]; 
+                        foreach (var item in currentOutputs)
+                        {
+                            var v = (item / totalouts) * 100;
+                             outputString += $"{d}:{String.Format("{0:0.00}", v)}%\n";
+                            lastLabels[d] = (int)((v/100) * 255);
                             d++;
                         }
                         //arry = currentOutputs.Select(f => Convert.ToByte(f)).ToArray();
                         //
                         //currentOutputs.CopyTo(arry, 0);
                         mnistImageOut.SetData<byte>(arry);
-                        //lastLabel = currentMnistImage.Label.ToString();
-                        lastLabel = outputString;
+                        lasttargetlabel = (int)currentMnistImage.Label;
+                        lastoutputstring = outputString;
                         //   NetWorker.RunWorkerAsync();
 
                     }
+                    averageConfidance = $"AvgConfidance:\n{String.Format("{0:0.00}", (runningConfidance / runningConfidanceCount)*100)}";
+                    runningConfidance = 0;
+                    runningConfidanceCount = 0;
                     NetWorker.RunWorkerAsync();
 
                 }
@@ -303,7 +341,7 @@ namespace Minst_MonoGame
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(new Color(20, 20, 20, 255));
-            _spriteBatch.Begin();
+            _spriteBatch.Begin(blendState: BlendState.NonPremultiplied);
 
             foreach (var button in _buttonComponents)
             {
@@ -316,6 +354,29 @@ namespace Minst_MonoGame
             }
 
 
+            var c = 0;
+            if (lastLabels != null)
+            {
+                foreach (var label in lastLabels)
+                {
+                    if (c == lasttargetlabel)
+                    {
+                      _spriteBatch.DrawString(largefont, c.ToString(), new Vector2(window_w / 2-200, window_h / 2-500), new Color(0,255,0,lastLabels[c]));
+
+                    }
+                    else
+                    {
+
+                      _spriteBatch.DrawString(largefont, c.ToString(), new Vector2(window_w / 2-200, window_h / 2-500), new Color(255,0,0,lastLabels[c]));
+                    }
+                   
+                    c++;
+                }
+              //  _spriteBatch.DrawString(font, "1", new Vector2(window_w / 2, window_h / 2), new Color(255, 255, 255, lastLabels[1]));
+               // _spriteBatch.DrawString(font, "2", new Vector2(window_w / 2, window_h / 2), new Color(255, 255, 255, lastLabels[2]));
+                
+
+            }
 
             //     var s6 = font.MeasureString(netData[6]) / 2;
             //     var s7 = font.MeasureString(netData[7]) / 2;
@@ -327,10 +388,11 @@ namespace Minst_MonoGame
             //    _spriteBatch.DrawString(font, netData[7], new Vector2(window_w / 2 - s7.X, window_h / 2 -100), Color.Black);
             //    _spriteBatch.DrawString(font, netData[6], new Vector2(window_w / 2 + 300, window_h / 2 +50), Color.Black);
             //   _spriteBatch.DrawString(font, netData[1], new Vector2(window_w/2 - s1.X, window_h/2 ), Color.Black);
-            _spriteBatch.DrawString(font, lastLabel, new Vector2(window_w / 2 + 430, 50), Color.White);
+            _spriteBatch.DrawString(font, lastoutputstring, new Vector2(window_w / 2 + 430, 50), Color.White);
            // _spriteBatch.DrawString(font, "" + TimeLabel, new Vector2(window_w / 2 + 430, window_h / 2), Color.White);
          //   _spriteBatch.DrawString(font, netData[2], new Vector2(window_w / 2 + 430, window_h / 2 + 50), Color.White);
-            _spriteBatch.DrawString(font, "Gen: "+ currentgen, new Vector2(window_w / 2 + 430, window_h / 2 + 200), Color.White);
+            _spriteBatch.DrawString(font, "Gen: "+ currentgen, new Vector2(window_w / 2 + 430, window_h / 2 + 220), Color.White);
+            _spriteBatch.DrawString(font, averageConfidance, new Vector2(window_w / 2 + 430, window_h / 2 + 270), Color.White);
             // _spriteBatch.DrawString(font, netData[4], new Vector2(window_w / 2 + 430, window_h / 2 + 100), Color.White);
             // _spriteBatch.DrawString(font, netData[6], new Vector2(window_w / 2 + 430, window_h / 2 + 200), Color.White);
             //    _spriteBatch.DrawString(font, netData[3], new Vector2(window_w / 2 - s3.X, window_h / 2 + 100), Color.Black);

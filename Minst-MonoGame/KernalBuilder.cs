@@ -9,6 +9,8 @@ namespace Minst_MonoGame
         // public static OpenCLTemplate.CLCalc.Program.Kernel new_kernal_CL;
         public static Dictionary<string, OpenCLTemplate.CLCalc.Program.Variable> Args_CL = new Dictionary<string, OpenCLTemplate.CLCalc.Program.Variable>();
         public static int[] netShape;
+        public static float learningRate = 0.1f;
+        public static float momentum = 0.5f;
 
         public static string BuidlKernal(int[] _netShape, out Dictionary<string, OpenCLTemplate.CLCalc.Program.Variable> _args_CL)
         {
@@ -31,18 +33,18 @@ namespace Minst_MonoGame
                      _out[globalid] = sig;
                     
                 }";
-            string backpropoutputFucntion = @"
+            string backpropoutputFucntion = $@"
                 void backpropoutput(float * _error, float * _gamma, float * _in, float * _targets, float * _weightsDelta, float * _out, int inputLength, int globalid )
-                {
+                {{
                     _error[globalid] = (_out[globalid] - _targets[globalid]);
                     _gamma[globalid] = _error[globalid] * (_out[globalid] * (1 - _out[globalid]));
                     for (int j = 0; j < inputLength; j++)
-                        {                           
+                        {{                           
                            int Windex = GetWeightIndex(globalid, j, inputLength);
                            float v = _gamma[globalid] * _in[j];                           
-                           _weightsDelta[Windex] = (v *0.02f) + (_weightsDelta[Windex] * 0.02f);
-                        }
-                }";
+                           _weightsDelta[Windex] = (v *{learningRate}) + (_weightsDelta[Windex] * {momentum});
+                        }}
+                }}";
             string backprophiddenFunction = @"
                void backprophidden(float * _out, float * _gamma, float * _gammaForward, float * weightsForward, int weightsWidth, int gammaForwardLength ,int globalid)
                {
@@ -54,17 +56,17 @@ namespace Minst_MonoGame
                     }
                     _gamma[globalid] *= (_out[globalid] * (1 - _out[globalid]));
                }";
-            string backprophidden2Function = @"
+            string backprophidden2Function = $@"
                void backprophidden2(float * _in, float * _gamma, float * _weightsDelta, float * _weightsDeltaOLD, int numberOfInputs ,int globalid)
-               {
+               {{
                     for (int j = 0; j < numberOfInputs; j++)
-                    {   
+                    {{   
                         float v = (_gamma[globalid] * _in[j]);
                         int windex = GetWeightIndex(  globalid,j,  numberOfInputs);
                       // _weightsDeltaOLD[windex] = _weightsDelta[windex];
-                       _weightsDelta[windex] = (v *0.02f) + (_weightsDelta[windex] * 0.02f);                      
-                    }
-                }";
+                       _weightsDelta[windex] = (v *{learningRate}) + (_weightsDelta[windex] * {momentum});                      
+                    }}
+                }}";
             string updateWeightsFunction = @"
                 void updateWeights(float * _weights, float * _weightsDelta, int numberOfInputs ,int globalid)
                 {

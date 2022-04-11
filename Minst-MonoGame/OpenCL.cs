@@ -48,9 +48,9 @@ namespace Minst_MonoGame
                 Args_CL["currentlayer"].WriteToDevice(new int[] { i });
                 FeedForwardLayer_kernal_CL.Execute(Args_CL.Values.ToArray(), new int[] { netShape[i] });
             }
-            //float[] outs = new float[Args_CL["outNodes"].OriginalVarLength];
-            //Args_CL["outNodes"].ReadFromDeviceTo(outs);
-            return null;
+            float[] outs = new float[Args_CL["outNodes"].OriginalVarLength];
+            Args_CL["outNodes"].ReadFromDeviceTo(outs);
+            return outs;
         }
         public float[] backpropNetwork(float[] targets)
         {
