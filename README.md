@@ -4,3 +4,7 @@ A Machine Learning project. This project was to teach myself more about machine 
 This network is built from scratch and uses supervised learning with gradient descent to identify handwritten digits in the MNIST dataset.
 
 Recently I have changed the computation from CPU to GPU for a massive speedup. I used OpenCL to achieve this. 
+
+NeuralNet.cs  contains old code for the NeuralNetwork that runs on the cpu only and is obsolete.
+
+OpenCL.cs and KernalBuilder.cs contain the newer OpenCL implmentation.
