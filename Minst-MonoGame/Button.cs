@@ -65,6 +65,7 @@ namespace Minst_MonoGame
 
         #region Properties
         public event EventHandler<Button> Click;
+        
         public bool Clicked { get; private set; }
 
         public Color PenColour { get; set; }
@@ -132,6 +133,7 @@ namespace Minst_MonoGame
 
                 if (_currentmouse.LeftButton == ButtonState.Released && _previousMouse.LeftButton == ButtonState.Pressed)
                 {
+                    //Click?.Invoke(this, this);
                     Click?.Invoke(this, this);
                 }
             }

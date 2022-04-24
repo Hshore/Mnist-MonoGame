@@ -39,11 +39,7 @@ namespace Minst_MonoGame
         public float runningConfidance = 0;
         public int runningConfidanceCount = 0;
 
-        Texture2D button_texture;
-        Texture2D slider_texture;
-        Texture2D sliderToggle_texture;
-        Texture2D img_input_texture;
-        Texture2D img_output_texture;
+        
         Texture2D whiteRectangle;
         Texture2D mnistImage;
         Texture2D mnistImageOut;
@@ -222,6 +218,7 @@ namespace Minst_MonoGame
                 if (NetWorker.IsBusy != true)
                 {
                     // Start the asynchronous operation.
+                    button.Text = "Stop";
                     NetWorker.RunWorkerAsync(net);
                 }
             }
@@ -230,24 +227,11 @@ namespace Minst_MonoGame
                 if (NetWorker.WorkerSupportsCancellation == true)
                 {
                     // Cancel the asynchronous operation.
+                    button.Text = "Run";
                     NetWorker.CancelAsync();
                 }
             }
-            if (button.Text == "Run")
-            {
-                button.Text = "Stop";
-
-            }
-            else
-            {
-                button.Text = "Run";
-
-            }
-
-            // currentMnistImage = net.GetRandomTrainingImage();
-            //  mnistImage.SetData<byte>(currentMnistImage.DataFlat);
-
-            // throw new System.NotImplementedException();
+       
         }
 
         protected override void Update(GameTime gameTime)
@@ -258,6 +242,7 @@ namespace Minst_MonoGame
 
             }
 
+               
 
             foreach (var button in _buttonComponents)
             {

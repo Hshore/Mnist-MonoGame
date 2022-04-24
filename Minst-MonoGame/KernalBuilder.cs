@@ -10,7 +10,7 @@ namespace Minst_MonoGame
         public static Dictionary<string, OpenCLTemplate.CLCalc.Program.Variable> Args_CL = new Dictionary<string, OpenCLTemplate.CLCalc.Program.Variable>();
         public static int[] netShape;
         public static float learningRate = 0.1f;
-        public static float momentum = 0.5f;
+        public static float momentum = 0.3f;
 
         public static string BuidlKernal(int[] _netShape, out Dictionary<string, OpenCLTemplate.CLCalc.Program.Variable> _args_CL)
         {
