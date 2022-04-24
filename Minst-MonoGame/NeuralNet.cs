@@ -68,7 +68,7 @@ namespace Minst_MonoGame
             }
 
             //mario
-            foreach (string imageFileName in Directory.GetFiles(ImagePath))
+           /* foreach (string imageFileName in Directory.GetFiles(ImagePath))
             {
                 // Extensions.Image img = new Extensions.Image();
 
@@ -102,7 +102,7 @@ namespace Minst_MonoGame
                 newImage.DataFlat = flat;
                 newImage.DataFlat_NetInputs = flat_netInputs;
                 marioTrainingImages.Add(newImage);
-            }
+            }*/
 
             //Build Network
             selectedData = new List<Extensions.Image>();
